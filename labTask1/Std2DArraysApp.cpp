@@ -4,16 +4,17 @@
 int main() {
     std::array<std::array<int, MAXNUMBEROFCOLUMNS>, MAXNUMBEROFROWS> arr;
     int numberOfRows, numberOfColumns;
-    std::cout << "Enter the number of rows:";
+    std::cout << "Enter the number of rows: ";
     std::cin >> numberOfRows;
-    std::cout << "Enter the number of columns:";
+    std::cout << "Enter the number of columns: ";
     std::cin >> numberOfColumns;
 
     try {
         fillArray(arr, numberOfRows, numberOfColumns);
+        std::cout << "Filled array:" << std::endl;
         printArray(arr, numberOfRows, numberOfColumns);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
         std::cout << "Exception: " << e.what() << std::endl;
     }
 
