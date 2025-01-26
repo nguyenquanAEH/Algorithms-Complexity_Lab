@@ -3,73 +3,70 @@
 #include <stdexcept>
 #include <string>
 
-// 1) A simple array-based stack
+// 1) Array-based stack template
 template <typename T, int MAX_SIZE>
 class Stack {
 private:
     T arr[MAX_SIZE];
     int topIndex;
+
 public:
-    // Constructor
     Stack() : topIndex(-1) {}
 
-    // Push a new element onto the stack
     void push(const T& element) {
-        if (topIndex == MAX_SIZE - 1) {
+        if (isFull()) {
             throw std::overflow_error("Stack is full");
         }
         arr[++topIndex] = element;
     }
 
-    // Pop the top element from the stack
     T pop() {
-        if (topIndex == -1) {
+        if (isEmpty()) {
             throw std::underflow_error("Stack is empty");
         }
         return arr[topIndex--];
     }
 
-    // Check if the stack is empty
     bool isEmpty() const {
         return (topIndex == -1);
     }
 
-    // Return how many elements are in the stack
+    bool isFull() const {
+        return (topIndex == MAX_SIZE - 1);
+    }
+
     int size() const {
         return (topIndex + 1);
     }
 };
 
-// Helper function to check if a token is an operator
-bool isOperator(const std::string& token) {
-    return (token == "+" || token == "-" || token == "*" || token == "/");
-}
-
 int main()
 {
-    // Prompt the user for input
-    std::cout << "Enter a postfix expression (e.g., '2 3 + 4 *'): ";
-    std::string inputLine;
-    std::getline(std::cin, inputLine); // read the entire line
+    // 2) Read the entire postfix expression from user input
+    std::cout << "Enter a postfix expression (e.g. '10 4 + 2 * 3 -'): ";
+    std::string input;
+    std::getline(std::cin, input);
 
-    // Prepare a string stream to split into tokens
-    std::istringstream ss(inputLine);
+    // 3) Use stringstream to break the expression into tokens
+    std::stringstream ss(input);
 
-    // Create the stack (capacity of 100)
-    Stack<int, 100> stack;
+    // Create a stack for integer operands
+    Stack<int, 100> stack;  // capacity can be adjusted as needed
 
-    // Read tokens one by one
     std::string token;
-    while (ss >> token) {
-        // If it's an operator, pop two operands and apply
-        if (isOperator(token)) {
+    while (ss >> token)
+    {
+        // 4) Check if the token is an operator or a number
+        if (token == "+" || token == "-" || token == "*" || token == "/") {
+            // Pop top two elements
             if (stack.size() < 2) {
                 std::cerr << "Error: not enough operands for operator '" << token << "'.\n";
-                return 1; // exit with error
+                return 1; // Exit with error
             }
             int rightOperand = stack.pop();
             int leftOperand = stack.pop();
 
+            // Apply the operator
             int result = 0;
             if (token == "+") {
                 result = leftOperand + rightOperand;
@@ -83,39 +80,37 @@ int main()
             else if (token == "/") {
                 if (rightOperand == 0) {
                     std::cerr << "Error: division by zero.\n";
-                    return 1; // exit with error
+                    return 1; // Exit with error
                 }
-                result = leftOperand / rightOperand; // integer division
+                // integer division
+                result = leftOperand / rightOperand;
             }
-            // Push the result back
+            // Push the result back onto the stack
             stack.push(result);
         }
         else {
-            // Otherwise, we assume it's an integer
+            // 5) Otherwise, assume it's a number
             try {
                 int number = std::stoi(token);
                 stack.push(number);
             }
-            catch (...) {
-                std::cerr << "Error: invalid token '" << token << "'.\n";
-                return 1; // exit with error
+            catch (std::invalid_argument&) {
+                std::cerr << "Invalid token encountered: " << token << "\n";
+                return 1; // Exit with error
             }
         }
     }
 
-    // After processing all tokens, there should be exactly one number on the stack
+    // 6) At the end, the stack should have exactly one element (the final result)
     if (stack.size() != 1) {
         std::cerr << "Error: invalid postfix expression. Stack size = "
             << stack.size() << "\n";
         return 1;
     }
 
-    // The final value on the stack is our result
+    // 7) Get the final result from the stack
     int finalResult = stack.pop();
-    std::cout << "Result = " << finalResult << std::endl;
+    std::cout << "Result: " << finalResult << std::endl;
 
-    // Pause for user to see the result (optional on some systems)
-    // system("pause"); // Uncomment if you want to pause the console window
-
-    return 0;
+    return 0; // success
 }
